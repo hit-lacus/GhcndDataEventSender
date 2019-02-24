@@ -1,7 +1,11 @@
 import gzip
 import metadata_reader as METADATA
 import json
+import glob
 from datetime import datetime
+import argparse
+import sys
+import time
 
 COUNTRY_DICT = METADATA.read_country('../metadata/ghcnd-countries.txt')
 
@@ -14,8 +18,6 @@ ELEMENT_DICT = {'PRCP': 'precipitation', 'SNOW': 'snow_fall', 'SNWD': 'snow_dept
                 'AWND': 'avg_wind_speed', 'WSF2': 'fastest_2_min_wind_speed'}
 
 ELEMENT_TYPE = set(ELEMENT_DICT.keys())
-
-USE_NULL = True
 
 msg = dict()
 
@@ -157,6 +159,8 @@ def read_gzip_data_file(path):
             text_line = pf.readline()
             if text_line:
                 event_count += 1
+                if event_count % 1000 == 0:
+                    time.sleep(SLEEP_MILLS / 1000.0)
                 columns = text_line.split(',')
                 element_type = columns[2]
                 station_id = columns[0]
@@ -178,8 +182,49 @@ def read_gzip_data_file(path):
                     single_station_event.append((datetime_str, element_type, element_value))
             else:
                 break
-    return event_count, result_count, datetime.now() - start_time
+    duration = datetime.now() - start_time
+    return ">>>STATS<<< [%s] : event count %s, send %s msg, start from %s ,duration is %s, rate %s msg/sec" % (
+        path, event_count, result_count, start_time, duration, result_count / duration.total_seconds())
+
+
+def init_argument():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data-path', required=True, type=str, help="where does *.csv.gz store")
+    parser.add_argument('--sleep-millsecond-per-thousand', required=True, type=int,
+                        help="After send one thousand msg, thread will sleep some millseconds")
+    parser.add_argument('--enable-null-value', dest='USE_NULL', action='store_true',
+                        help="for some measure which does not exist, use null or default value")
+    parser.add_argument('--display-sample', dest='DISPLAY_SAMPLE', action='store_true',
+                        help="if you do not download required data file, "
+                             "you can use provided sample file(../sample/1872.csv.gz)")
+    args = parser.parse_args()
+    return args
+
+
+def main(path_patterns):
+    all_paths = glob.glob(path_patterns)
+    print >> sys.stderr, "To be read files count", len(all_paths)
+    print >> sys.stderr, json.dumps(all_paths, indent=1)
+    for one_path in all_paths:
+        try:
+            print >> sys.stderr, read_gzip_data_file(one_path)
+        except Exception as exp:
+            print >> sys.stderr, exp
 
 
 if __name__ == "__main__":
-    print read_gzip_data_file('../sample/1872.csv.gz')
+    """
+    Usage:
+    python THIS_FILE.py --data-path /Users/xiaoxiang.yu/Downloads/ghcn_data/*.csv.gz \
+        --sleep-millsecond-per-thousand 1000 \
+        --enable-null-value  --display-sample 
+    """
+    OPTION = init_argument()
+    DISPLAY_SAMPLE = OPTION.DISPLAY_SAMPLE
+    USE_NULL = OPTION.USE_NULL
+    path_pattern = OPTION.data_path
+    SLEEP_MILLS = OPTION.sleep_millsecond_per_thousand + 0.0
+    if DISPLAY_SAMPLE:
+        print >> sys.stderr, read_gzip_data_file('../sample/1872.csv.gz')
+    else:
+        main(path_pattern)
