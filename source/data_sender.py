@@ -159,7 +159,7 @@ def read_gzip_data_file(path):
             text_line = pf.readline()
             if text_line:
                 event_count += 1
-                if event_count % 1000 == 0:
+                if SLEEP_MILLS > 0 and event_count % 1000 == 0:
                     time.sleep(SLEEP_MILLS / 1000.0)
                 columns = text_line.split(',')
                 element_type = columns[2]
