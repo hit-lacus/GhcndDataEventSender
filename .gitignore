@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+.idea/*
+vcs.xml
+2018.csv.gz
