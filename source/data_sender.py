@@ -19,7 +19,10 @@ ELEMENT_DICT = {'PRCP': 'precipitation', 'SNOW': 'snow_fall', 'SNWD': 'snow_dept
 
 ELEMENT_TYPE = set(ELEMENT_DICT.keys())
 
+BEGIN_DT = datetime(1970, 1, 1)
+
 msg = dict()
+gmt8 = 3600 * 8 * 1000
 
 
 def transform_degree(degree):
@@ -115,6 +118,8 @@ class StationDailyMsg:
         msg['snow_water_equivalent'] = self.snow_water_equivalent
         msg['avg_wind_speed'] = self.avg_wind_speed
         msg['fastest_2_min_wind_speed'] = self.fastest_2_min_wind_speed
+        now = datetime.now()
+        msg['ts'] = int((now - BEGIN_DT).total_seconds()) - gmt8
         return json.dumps(msg)
 
 
