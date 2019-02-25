@@ -22,16 +22,6 @@ ELEMENT_TYPE = set(ELEMENT_DICT.keys())
 BEGIN_DT = datetime(1970, 1, 1)
 
 msg = dict()
-gmt8 = 3600 * 8 * 1000
-
-
-def transform_degree(degree):
-    if degree is None:
-        return degree
-    elif degree == 1000 or degree == -1000:
-        return degree + 0.0
-    else:
-        return round((degree - 32) / 1.8, 2)
 
 
 class StationDailyMsg:
@@ -68,9 +58,9 @@ class StationDailyMsg:
             self.country_name = ''
             self.us_state = ''
             self.state_name = ''
-            self.latitude = -1.0
-            self.longitude = -1.0
-            self.elevation = -1.0
+            self.latitude = -1
+            self.longitude = -1
+            self.elevation = -1
             # Measure with default value
             self.max_temperature = -1000.0
             self.min_temperature = 1000.0
@@ -96,31 +86,37 @@ class StationDailyMsg:
             self.state_name = STATE_DICT.get(self.us_state)
 
     def __str__(self):
-        msg['station_id'] = self.station_id
-        msg['date'] = self.date_str
-        msg['station_name'] = self.station_name
-        msg['year'] = self.year
-        msg['month'] = self.month
-        msg['day'] = self.day
-        msg['country'] = self.country
-        msg['country_name'] = self.country_name
-        msg['us_state'] = self.us_state
-        msg['state_name'] = self.state_name
-        msg['latitude'] = self.latitude
-        msg['longitude'] = self.longitude
-        msg['elevation'] = self.elevation
-        msg['max_temperature'] = transform_degree(self.max_temperature)
-        msg['min_temperature'] = transform_degree(self.min_temperature)
-        msg['avg_temperature'] = transform_degree(self.avg_temperature)
-        msg['precipitation'] = self.precipitation
-        msg['snow_depth'] = self.snow_depth
-        msg['snow_fall'] = self.snow_fall
-        msg['snow_water_equivalent'] = self.snow_water_equivalent
-        msg['avg_wind_speed'] = self.avg_wind_speed
-        msg['fastest_2_min_wind_speed'] = self.fastest_2_min_wind_speed
-        now = datetime.now()
-        msg['ts'] = int((now - BEGIN_DT).total_seconds()) - gmt8
-        return json.dumps(msg)
+        if OUTPUT_FORMAT == 'csv':
+            pass
+        elif OUTPUT_FORMAT == 'json':
+            msg['station_id'] = self.station_id
+            msg['observe_date'] = '%s-%s-%s' % (self.year, self.month, self.day)
+            msg['station_name'] = self.station_name
+            msg['obs_year'] = self.year
+            msg['obs_month'] = self.month
+            msg['obs_day'] = self.day
+            msg['country'] = self.country
+            msg['country_name'] = self.country_name
+            msg['us_state'] = self.us_state
+            msg['state_name'] = self.state_name
+            msg['latitude'] = int(self.latitude)
+            msg['longitude'] = int(self.longitude)
+            msg['elevation_accurate'] = int(self.elevation)
+            msg['elevation'] = int(self.elevation) / 50 * 50
+            msg['max_temperature'] = self.max_temperature
+            msg['min_temperature'] = self.min_temperature
+            msg['avg_temperature'] = self.avg_temperature
+            msg['precipitation'] = self.precipitation
+            msg['snow_depth'] = self.snow_depth
+            msg['snow_fall'] = self.snow_fall
+            msg['snow_water_equivalent'] = self.snow_water_equivalent
+            msg['avg_wind_speed'] = self.avg_wind_speed
+            msg['fastest_2_min_wind_speed'] = self.fastest_2_min_wind_speed
+            now = datetime.utcnow()
+            msg['ts'] = int((now - BEGIN_DT).total_seconds()) * 1000
+            return json.dumps(msg)
+        else:
+            return 'CANNOT_FORMAT'
 
 
 def read_gzip_data_file(path):
@@ -137,11 +133,11 @@ def read_gzip_data_file(path):
                 if et == 'PRCP':
                     smsg.precipitation = int(event[2])
                 elif et == 'TMAX':
-                    smsg.max_temperature = int(event[2])
+                    smsg.max_temperature = int(event[2]) / 10.0
                 elif et == 'TMIN':
-                    smsg.min_temperature = int(event[2])
+                    smsg.min_temperature = int(event[2]) / 10.0
                 elif et == 'TAVG':
-                    smsg.avg_temperature = int(event[2])
+                    smsg.avg_temperature = int(event[2]) / 10.0
                 elif et == 'SNWD':
                     smsg.snow_depth = int(event[2])
                 elif et == 'SNOW':
@@ -194,14 +190,17 @@ def read_gzip_data_file(path):
 
 def init_argument():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data-path', required=True, type=str, help="where does *.csv.gz store")
-    parser.add_argument('--sleep-millsecond-per-thousand', required=True, type=int,
-                        help="After send one thousand msg, thread will sleep some millseconds")
+    parser.add_argument('--sleep-millsecond-per-thousand', required=False, type=int,
+                        help="After send one thousand msg, thread will sleep some millseconds", default=0)
+    parser.add_argument('--data-path', required=False, type=str, help="where does *.csv.gz store",
+                        default='../sample/1872.csv.gz')
     parser.add_argument('--enable-null-value', dest='USE_NULL', action='store_true',
                         help="for some measure which does not exist, use null or default value")
     parser.add_argument('--display-sample', dest='DISPLAY_SAMPLE', action='store_true',
                         help="if you do not download required data file, "
                              "you can use provided sample file(../sample/1872.csv.gz)")
+    parser.add_argument('--output-format', required=False, default='json',
+                        help="In which format will program output, json or csv.")
     args = parser.parse_args()
     return args
 
@@ -227,6 +226,7 @@ if __name__ == "__main__":
     OPTION = init_argument()
     DISPLAY_SAMPLE = OPTION.DISPLAY_SAMPLE
     USE_NULL = OPTION.USE_NULL
+    OUTPUT_FORMAT = OPTION.output_format
     path_pattern = OPTION.data_path
     SLEEP_MILLS = OPTION.sleep_millsecond_per_thousand + 0.0
     if DISPLAY_SAMPLE:
