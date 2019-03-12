@@ -46,7 +46,7 @@ def read_station(path):
     return station_dict
 
 
-if __name__ == "__main__":
+def debug():
     res = read_station('../metadata/ghcnd-stations.txt')
     print len(res)
     print json.dumps(res.values()[0: 20], indent=1)
@@ -56,3 +56,28 @@ if __name__ == "__main__":
 
     res = read_country('../metadata/ghcnd-states.txt')
     print json.dumps(res.items()[0:20], indent=1)
+
+
+DELIMTER = '\t'
+
+
+def print_dimsension_table():
+    state_dict = read_state_us('../metadata/ghcnd-states.txt')
+    country_dict = read_country('../metadata/ghcnd-countries.txt')
+    station_dict = read_station('../metadata/ghcnd-stations.txt')
+    with open('state.data', 'w') as f1:
+        for row in state_dict:
+            print >> f1, DELIMTER.join([row, state_dict[row]])
+
+    with open('station.data', 'w') as f2:
+        for row in station_dict:
+            print >> f2, row + DELIMTER + DELIMTER.join(map(str, station_dict[row]))
+
+    with open('country.data', 'w') as f3:
+        for row in country_dict:
+            print >> f3, DELIMTER.join([row, country_dict[row]])
+
+
+if __name__ == "__main__":
+    # debug()
+    print_dimsension_table()

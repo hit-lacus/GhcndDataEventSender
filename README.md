@@ -64,4 +64,8 @@ Measure 度量
 ### Data Prepare
 
 ### Script Usage
-todo
+
+* Following script to create table into Hive
+```sh
+sh -x producer_hive_data.sh
+```

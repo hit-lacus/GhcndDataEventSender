@@ -87,7 +87,24 @@ class StationDailyMsg:
 
     def __str__(self):
         if OUTPUT_FORMAT == 'csv':
-            pass
+            now = datetime.utcnow()
+            data_list = [
+                self.station_id,  # FK
+                '%s-%s-%s' % (self.year, self.month, self.day),
+                '%s' % self.year,  # & Date Partition Column
+                self.max_temperature,
+                self.min_temperature,
+                self.avg_temperature,
+                self.precipitation,
+                self.snow_depth,
+                self.snow_fall,
+                self.snow_water_equivalent,
+                self.avg_wind_speed,
+                self.fastest_2_min_wind_speed,
+                (now - BEGIN_DT).total_seconds() * 1000,  # Timestamp Column
+            ]
+            return METADATA.DELIMTER.join(map(str, data_list))
+
         elif OUTPUT_FORMAT == 'json':
             msg['station_id'] = self.station_id
             msg['observe_date'] = '%s-%s-%s' % (self.year, self.month, self.day)
@@ -124,7 +141,7 @@ def read_gzip_data_file(path):
     result_count = 0
     start_time = datetime.now()
 
-    def process_station_events(s_id, events):
+    def process_station_events(s_id, events, _data_file):
         if events and len(events) > 0:
             smsg = StationDailyMsg(s_id, events[0][0])
             smsg.enrich_msg()
@@ -148,7 +165,11 @@ def read_gzip_data_file(path):
                     smsg.avg_wind_speed = int(event[2])
                 elif et == 'WSF2':
                     smsg.fastest_2_min_wind_speed = int(event[2])
-            print smsg
+            if OUTPUT_FORMAT == 'json':
+                print smsg
+            elif OUTPUT_FORMAT == 'csv':
+                print >> _data_file, smsg
+
             return smsg
         else:
             return None
@@ -156,6 +177,8 @@ def read_gzip_data_file(path):
     with gzip.open(path, 'rb') as pf:
         curr_station_id = None
         single_station_event = []
+        current_year = ''
+        data_file = open("ss", 'w')
         while True:
             text_line = pf.readline()
             if text_line:
@@ -166,6 +189,7 @@ def read_gzip_data_file(path):
                 element_type = columns[2]
                 station_id = columns[0]
                 datetime_str = columns[1]
+                year_str = datetime_str[0:4]
                 element_value = columns[3]
                 if element_type not in ELEMENT_TYPE:
                     continue
@@ -173,11 +197,22 @@ def read_gzip_data_file(path):
                 # quality_flag = columns[5]
                 # source_flag = columns[6]
                 # observation_hour_minute = columns[7]
+
+                # For all data for one year, write to single data file, like 1993.data
+                if current_year != year_str:
+                    try:
+                        data_file.close()
+                    except Exception as e:
+                        print >> sys.stderr, e
+                    data_file = open('%s.data' % year_str, 'w')
+                    current_year = year_str
+
+                # Process all events for single station in one day
                 if station_id == curr_station_id:
                     single_station_event.append((datetime_str, element_type, element_value))
                 else:
                     result_count += 1
-                    process_station_events(curr_station_id, single_station_event)
+                    process_station_events(curr_station_id, single_station_event, data_file)
                     curr_station_id = station_id
                     single_station_event = list()
                     single_station_event.append((datetime_str, element_type, element_value))
@@ -201,6 +236,8 @@ def init_argument():
                              "you can use provided sample file(../sample/1872.csv.gz)")
     parser.add_argument('--output-format', required=False, default='json',
                         help="In which format will program output, json or csv.")
+    parser.add_argument('--forever', required=False, default=False,
+                        help="In streaming way, will message be sent forever?")
     args = parser.parse_args()
     return args
 
@@ -229,7 +266,13 @@ if __name__ == "__main__":
     OUTPUT_FORMAT = OPTION.output_format
     path_pattern = OPTION.data_path
     SLEEP_MILLS = OPTION.sleep_millsecond_per_thousand + 0.0
+    FOREVER = OPTION.forever
+
     if DISPLAY_SAMPLE:
         print >> sys.stderr, read_gzip_data_file('../sample/1872.csv.gz')
     else:
-        main(path_pattern)
+        if FOREVER:
+            while True:
+                main(path_pattern)
+        else:
+            main(path_pattern)
