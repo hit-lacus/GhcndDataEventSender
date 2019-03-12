@@ -68,17 +68,20 @@ ALTER TABLE ghcn DROP IF EXISTS PARTITION (part_year='1876');
 ALTER TABLE ghcn DROP IF EXISTS PARTITION (part_year='1877');
 
 
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (obs_year='1874') LOCATION '/LacusDir/data/hive/ghcn/1874/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (obs_year='1875') LOCATION '/LacusDir/data/hive/ghcn/1875/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (obs_year='1876') LOCATION '/LacusDir/data/hive/ghcn/1876/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (obs_year='1877') LOCATION '/LacusDir/data/hive/ghcn/1877/';
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1874') LOCATION '/LacusDir/data/hive/ghcn/1874/';
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1875') LOCATION '/LacusDir/data/hive/ghcn/1875/';
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1876') LOCATION '/LacusDir/data/hive/ghcn/1876/';
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1877') LOCATION '/LacusDir/data/hive/ghcn/1877/';
 
-SELECT country_info.name as country_name, max(max_temperature) as max_temperature, max(precipitation) as precipitation
+SELECT part_year, country_info.name as country_name, max(max_temperature) as max_temperature,
+    max(precipitation) as precipitation, count(*) as obs_count,
+    count(distinct ghcn.station_id) as station_count
 FROM ghcn
      JOIN station_info ON ghcn.station_id = station_info.station_id
      JOIN country_info ON station_info.country = country_info.name
      JOIN state_info ON station_info.us_state = state_info.name
-GROUP BY country_info.name;
+GROUP BY part_year, country_info.name
+ORDER BY part_year, country_info.name;
 
 
 
