@@ -15,7 +15,7 @@ if __name__ == "__main__":
         print >> hdfs_scripts, "hadoop fs -rm -r /LacusDir/data/hive/ghcn/"
         for y in year_list:
             print >> hdfs_scripts, "hadoop fs -mkdir -p /LacusDir/data/hive/ghcn/%d-01-01/" % y
-            print >> hdfs_scripts, "hadoop fs -copyFromLocal ../fact_%d_* /LacusDir/data/hive/ghcn/%d-01-01/" % (y, y)
+            print >> hdfs_scripts, "hadoop fs -copyFromLocal ../fact_%d* /LacusDir/data/hive/ghcn/%d-01-01/" % (y, y)
 
     with open("../ddl/alter_hive.sql", 'w') as alter_scripts:
         print >> alter_scripts, "use lacus;"

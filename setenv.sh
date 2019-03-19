@@ -1,1 +1,0 @@
-export raw_file="/root/xiaoxiang/GhcndDataEventSender/sample/*.gz"
