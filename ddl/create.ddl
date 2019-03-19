@@ -58,15 +58,9 @@ ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t'
 STORED AS TEXTFILE;
 
 
-LOAD DATA LOCAL INPATH '../source/country.data' OVERWRITE INTO TABLE country_info;
-LOAD DATA LOCAL INPATH '../source/state.data' OVERWRITE INTO TABLE state_info;
-LOAD DATA LOCAL INPATH '../source/station.data' OVERWRITE INTO TABLE station_info;
-
-
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2001-01-01') LOCATION '/LacusDir/data/hive/ghcn/2001-01-01/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2011-01-01') LOCATION '/LacusDir/data/hive/ghcn/2011-01-01/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2002-01-01') LOCATION '/LacusDir/data/hive/ghcn/1876/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2003-01-01') LOCATION '/LacusDir/data/hive/ghcn/1877/';
+LOAD DATA LOCAL INPATH '../country.data' OVERWRITE INTO TABLE country_info;
+LOAD DATA LOCAL INPATH '../state.data' OVERWRITE INTO TABLE state_info;
+LOAD DATA LOCAL INPATH '../station.data' OVERWRITE INTO TABLE station_info;
 
 
 

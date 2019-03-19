@@ -1,1 +1,1 @@
-export raw_file="/root/xiaoxiang/data/ghcnd/*.gz"
+export raw_file="/root/xiaoxiang/GhcndDataEventSender/sample/*.gz"

@@ -1,0 +1,1 @@
+sh -x _produce_hive_data.sh

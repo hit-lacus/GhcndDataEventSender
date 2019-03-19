@@ -1,3 +1,4 @@
+use lacus;
 SELECT part_year, country_info.name as country_name, max(max_temperature) as max_temperature,
     max(precipitation) as precipitation, count(*) as obs_count,
     count(distinct ghcn.station_id) as station_count
