@@ -1,0 +1,1 @@
+export raw_file="/root/xiaoxiang/data/ghcnd/*.gz"

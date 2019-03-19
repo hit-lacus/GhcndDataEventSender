@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# This file read dimension table information and transfer its format
 import json
 
 
@@ -65,15 +66,15 @@ def print_dimsension_table():
     state_dict = read_state_us('../metadata/ghcnd-states.txt')
     country_dict = read_country('../metadata/ghcnd-countries.txt')
     station_dict = read_station('../metadata/ghcnd-stations.txt')
-    with open('state.data', 'w') as f1:
+    with open('../state.data', 'w') as f1:
         for row in state_dict:
             print >> f1, DELIMTER.join([row, state_dict[row]])
 
-    with open('station.data', 'w') as f2:
+    with open('../station.data', 'w') as f2:
         for row in station_dict:
             print >> f2, row + DELIMTER + DELIMTER.join(map(str, station_dict[row]))
 
-    with open('country.data', 'w') as f3:
+    with open('../country.data', 'w') as f3:
         for row in country_dict:
             print >> f3, DELIMTER.join([row, country_dict[row]])
 

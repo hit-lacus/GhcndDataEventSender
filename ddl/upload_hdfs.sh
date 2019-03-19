@@ -2,7 +2,7 @@
 
 hadoop fs -rm -r /LacusDir/data/hive/ghcn/
 
-hadoop fs -mkdir -p /LacusDir/data/hive/ghcn/1874/
+hadoop fs -mkdir -p /LacusDir/data/hive/ghcn/2001/
 hadoop fs -mkdir -p /LacusDir/data/hive/ghcn/1875/
 hadoop fs -mkdir -p /LacusDir/data/hive/ghcn/1876/
 hadoop fs -mkdir -p /LacusDir/data/hive/ghcn/1877/

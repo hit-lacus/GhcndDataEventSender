@@ -178,7 +178,7 @@ def read_gzip_data_file(path):
         curr_station_id = None
         single_station_event = []
         current_year = ''
-        data_file = open("ss", 'w')
+        data_file = open("../tt", 'w')
         while True:
             text_line = pf.readline()
             if text_line:
@@ -204,7 +204,7 @@ def read_gzip_data_file(path):
                         data_file.close()
                     except Exception as e:
                         print >> sys.stderr, e
-                    data_file = open('%s.data' % year_str, 'w')
+                    data_file = open('../fact_%s' % year_str, 'w')
                     current_year = year_str
 
                 # Process all events for single station in one day

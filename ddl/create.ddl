@@ -14,7 +14,7 @@ create table if not exists ghcn(
     snow_water_equivalent INT,
     avg_wind_speed INT,
     fastest_2_min_wind_speed INT,
-    ts BIGINT comment "event send timestamp"
+    ts STRING comment "event send timestamp"
 )
 COMMENT "Fact Table, contains different measure of climate all over the world"
 partitioned by (part_year string)
@@ -40,7 +40,7 @@ STORED AS TEXTFILE;
 
 drop table if exists country_info;
 create table if not exists country_info(
-name string comment "PK",
+name string comment "PK, name of a country",
 full_name string
 )
 COMMENT "Dimension Table, contains country info"
@@ -50,7 +50,7 @@ STORED AS TEXTFILE;
 
 drop table if exists state_info;
 create table if not exists state_info(
-name string comment "PK",
+name string comment "PK, name of a state of US",
 full_name string
 )
 COMMENT "Dimension Table, contains USA state info"
@@ -62,26 +62,13 @@ LOAD DATA LOCAL INPATH '../source/country.data' OVERWRITE INTO TABLE country_inf
 LOAD DATA LOCAL INPATH '../source/state.data' OVERWRITE INTO TABLE state_info;
 LOAD DATA LOCAL INPATH '../source/station.data' OVERWRITE INTO TABLE station_info;
 
-ALTER TABLE ghcn DROP IF EXISTS PARTITION (part_year='1874');
-ALTER TABLE ghcn DROP IF EXISTS PARTITION (part_year='1875');
-ALTER TABLE ghcn DROP IF EXISTS PARTITION (part_year='1876');
-ALTER TABLE ghcn DROP IF EXISTS PARTITION (part_year='1877');
+
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2001-01-01') LOCATION '/LacusDir/data/hive/ghcn/2001-01-01/';
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2011-01-01') LOCATION '/LacusDir/data/hive/ghcn/2011-01-01/';
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2002-01-01') LOCATION '/LacusDir/data/hive/ghcn/1876/';
+ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='2003-01-01') LOCATION '/LacusDir/data/hive/ghcn/1877/';
 
 
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1874') LOCATION '/LacusDir/data/hive/ghcn/1874/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1875') LOCATION '/LacusDir/data/hive/ghcn/1875/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1876') LOCATION '/LacusDir/data/hive/ghcn/1876/';
-ALTER TABLE ghcn ADD IF NOT EXISTS PARTITION (part_year='1877') LOCATION '/LacusDir/data/hive/ghcn/1877/';
-
-SELECT part_year, country_info.name as country_name, max(max_temperature) as max_temperature,
-    max(precipitation) as precipitation, count(*) as obs_count,
-    count(distinct ghcn.station_id) as station_count
-FROM ghcn
-     JOIN station_info ON ghcn.station_id = station_info.station_id
-     JOIN country_info ON station_info.country = country_info.name
-     JOIN state_info ON station_info.us_state = state_info.name
-GROUP BY part_year, country_info.name
-ORDER BY part_year, country_info.name;
 
 
 
