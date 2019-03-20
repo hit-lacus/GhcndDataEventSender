@@ -1,7 +1,5 @@
 # GhcndDataEventSender
-This project's purpose is 
-- Python script which used to send ghcnd data to mock a **real-time event data source**.
-- _ghcnd_ stand for "GLOBAL HISTORICAL CLIMATOLOGY NETWORK DAILY"
+> This project's purpose is to provided a python script which used to mock a **real-time event data source**. _ghcnd_ stand for "GLOBAL HISTORICAL CLIMATOLOGY NETWORK DAILY"
 
 
 ### Where to download
@@ -29,7 +27,7 @@ Please check:
 - [detail](./metadata/_ghcnd_readme.txt)
 - [sample data](sample/sample.csv)
 
-### Send Event Schema
+### Event Schema
 
 Dimension 维度
 - station_id 气象站点ID
@@ -61,9 +59,74 @@ Measure 度量
 - 14.99 GB csv file in gzip.
 - About 3 billion raw data.
 
-### Data Prepare
 
-### Script Usage
+### How to use
+* Prepare raw data from **where to download**
+
+Here, "/root/xiaoxiang/data/ghcnd" path store raw file, and it is the value of `data-path` in streaming way and `raw_file` in batch way.
+
+```sh
+[root@cdh8 ghcnd]# pwd
+/root/xiaoxiang/data/ghcnd
+[root@cdh8 ghcnd]# ls
+1763.csv.gz  1776.csv.gz  1789.csv.gz  1802.csv.gz  1815.csv.gz  1828.csv.gz  1841.csv.gz  1854.csv.gz  1867.csv.gz  1880.csv.gz  1893.csv.gz  1906.csv.gz  1919.csv.gz  1932.csv.gz  1945.csv.gz  1958.csv.gz  1971.csv.gz  1984.csv.gz  1997.csv.gz  2010.csv.gz
+1764.csv.gz  1777.csv.gz  1790.csv.gz  1803.csv.gz  1816.csv.gz  1829.csv.gz  1842.csv.gz  1855.csv.gz  1868.csv.gz  1881.csv.gz  1894.csv.gz  1907.csv.gz  1920.csv.gz  1933.csv.gz  1946.csv.gz  1959.csv.gz  1972.csv.gz  1985.csv.gz  1998.csv.gz  2011.csv.gz
+1765.csv.gz  1778.csv.gz  1791.csv.gz  1804.csv.gz  1817.csv.gz  1830.csv.gz  1843.csv.gz  1856.csv.gz  1869.csv.gz  1882.csv.gz  1895.csv.gz  1908.csv.gz  1921.csv.gz  1934.csv.gz  1947.csv.gz  1960.csv.gz  1973.csv.gz  1986.csv.gz  1999.csv.gz  2012.csv.gz
+1766.csv.gz  1779.csv.gz  1792.csv.gz  1805.csv.gz  1818.csv.gz  1831.csv.gz  1844.csv.gz  1857.csv.gz  1870.csv.gz  1883.csv.gz  1896.csv.gz  1909.csv.gz  1922.csv.gz  1935.csv.gz  1948.csv.gz  1961.csv.gz  1974.csv.gz  1987.csv.gz  2000.csv.gz  2013.csv.gz
+1767.csv.gz  1780.csv.gz  1793.csv.gz  1806.csv.gz  1819.csv.gz  1832.csv.gz  1845.csv.gz  1858.csv.gz  1871.csv.gz  1884.csv.gz  1897.csv.gz  1910.csv.gz  1923.csv.gz  1936.csv.gz  1949.csv.gz  1962.csv.gz  1975.csv.gz  1988.csv.gz  2001.csv.gz  2014.csv.gz
+1768.csv.gz  1781.csv.gz  1794.csv.gz  1807.csv.gz  1820.csv.gz  1833.csv.gz  1846.csv.gz  1859.csv.gz  1872.csv.gz  1885.csv.gz  1898.csv.gz  1911.csv.gz  1924.csv.gz  1937.csv.gz  1950.csv.gz  1963.csv.gz  1976.csv.gz  1989.csv.gz  2002.csv.gz  2015.csv.gz
+1769.csv.gz  1782.csv.gz  1795.csv.gz  1808.csv.gz  1821.csv.gz  1834.csv.gz  1847.csv.gz  1860.csv.gz  1873.csv.gz  1886.csv.gz  1899.csv.gz  1912.csv.gz  1925.csv.gz  1938.csv.gz  1951.csv.gz  1964.csv.gz  1977.csv.gz  1990.csv.gz  2003.csv.gz  2016.csv.gz
+1770.csv.gz  1783.csv.gz  1796.csv.gz  1809.csv.gz  1822.csv.gz  1835.csv.gz  1848.csv.gz  1861.csv.gz  1874.csv.gz  1887.csv.gz  1900.csv.gz  1913.csv.gz  1926.csv.gz  1939.csv.gz  1952.csv.gz  1965.csv.gz  1978.csv.gz  1991.csv.gz  2004.csv.gz  2017.csv.gz
+1771.csv.gz  1784.csv.gz  1797.csv.gz  1810.csv.gz  1823.csv.gz  1836.csv.gz  1849.csv.gz  1862.csv.gz  1875.csv.gz  1888.csv.gz  1901.csv.gz  1914.csv.gz  1927.csv.gz  1940.csv.gz  1953.csv.gz  1966.csv.gz  1979.csv.gz  1992.csv.gz  2005.csv.gz  2018.csv.gz
+1772.csv.gz  1785.csv.gz  1798.csv.gz  1811.csv.gz  1824.csv.gz  1837.csv.gz  1850.csv.gz  1863.csv.gz  1876.csv.gz  1889.csv.gz  1902.csv.gz  1915.csv.gz  1928.csv.gz  1941.csv.gz  1954.csv.gz  1967.csv.gz  1980.csv.gz  1993.csv.gz  2006.csv.gz  2019.csv.gz
+1773.csv.gz  1786.csv.gz  1799.csv.gz  1812.csv.gz  1825.csv.gz  1838.csv.gz  1851.csv.gz  1864.csv.gz  1877.csv.gz  1890.csv.gz  1903.csv.gz  1916.csv.gz  1929.csv.gz  1942.csv.gz  1955.csv.gz  1968.csv.gz  1981.csv.gz  1994.csv.gz  2007.csv.gz
+1774.csv.gz  1787.csv.gz  1800.csv.gz  1813.csv.gz  1826.csv.gz  1839.csv.gz  1852.csv.gz  1865.csv.gz  1878.csv.gz  1891.csv.gz  1904.csv.gz  1917.csv.gz  1930.csv.gz  1943.csv.gz  1956.csv.gz  1969.csv.gz  1982.csv.gz  1995.csv.gz  2008.csv.gz
+1775.csv.gz  1788.csv.gz  1801.csv.gz  1814.csv.gz  1827.csv.gz  1840.csv.gz  1853.csv.gz  1866.csv.gz  1879.csv.gz  1892.csv.gz  1905.csv.gz  1918.csv.gz  1931.csv.gz  1944.csv.gz  1957.csv.gz  1970.csv.gz  1983.csv.gz  1996.csv.gz  2009.csv.gz 
+```
+
+* Following script to send streaming message to somewhere (maybe kafka producer)
+```sh
+[root@cdh8 source]# python data_sender.py -help
+usage: data_sender.py [-h]
+                      [--sleep-millsecond-per-thousand SLEEP_MILLSECOND_PER_THOUSAND]
+                      [--data-path DATA_PATH] [--enable-null-value]
+                      [--display-sample] [--output-format OUTPUT_FORMAT]
+                      [--forever FOREVER]
+data_sender.py: error: argument -h/--help: ignored explicit argument 'elp'
+[root@cdh8 source]# python data_sender.py -h
+usage: data_sender.py [-h]
+                      [--sleep-millsecond-per-thousand SLEEP_MILLSECOND_PER_THOUSAND]
+                      [--data-path DATA_PATH] [--enable-null-value]
+                      [--display-sample] [--output-format OUTPUT_FORMAT]
+                      [--forever FOREVER]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --sleep-millsecond-per-thousand SLEEP_MILLSECOND_PER_THOUSAND
+                        After send one thousand msg, thread will sleep some
+                        millseconds
+  --data-path DATA_PATH
+                        where does *.csv.gz store
+  --enable-null-value   for some measure which does not exist, use null or
+                        default value
+  --display-sample      if you do not download required data file, you can use
+                        provided sample file(../sample/1872.csv.gz)
+  --output-format OUTPUT_FORMAT
+                        In which format will program output, json or csv.
+  --forever FOREVER     In streaming way, will message be sent forever?
+
+[root@cdh8 source]# python data_sender.py
+To be read files count 1
+[
+ "../sample/1872.csv.gz"
+]
+{"fastest_2_min_wind_speed": 0, "state_name": "ONTARIO", "max_temperature": -1000.0, "snow_fall": 0, "observe_date": "1872-1-1", "ts": "CA006144470-1-0-47", "latitude": 42, "min_temperature": 1000.0, "obs_day": 1, "obs_month": 1, "snow_depth": 0, "elevation": 200, "obs_year": 1872, "elevation_accurate": 246, "station_id": "CA006144470", "country_name": "Canada", "station_name": "LONDON", "precipitation": 0, "avg_temperature": -1000.0, "country": "CA", "longitude": -81, "snow_water_equivalent": 0, "us_state": "ON", "avg_wind_speed": 0}
+
+...
+
+
+```
+
 
 * Following script to create table into Hive
 ```sh
